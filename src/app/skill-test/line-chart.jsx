@@ -74,19 +74,6 @@ const DynamicPercentileGraph = ({ userPercentile, chartKey }) => {
       <div className="w-full max-w-3xl">
         <CanvasJSChart key={chartKey} options={options} />
       </div>
-      {/* <div className="flex flex-col mt-4 items-center">
-        <label className="mb-2 font-medium">
-          Update User Percentile (0–100):
-        </label>
-        <input
-          type="number"
-          min="0"
-          max="100"
-          value={userPercentile}
-          onChange={handleUserChange}
-          className="border p-2 rounded w-32 text-center"
-        />
-      </div> */}
     </div>
   );
 };

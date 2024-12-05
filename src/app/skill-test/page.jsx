@@ -16,10 +16,11 @@ const SkillTest = () => {
   const isLargeDevice = useMediaQuery({ query: "(min-width: 1024px)" });
 
   const [averagePercentile, setAveragePercentile] = useState(72);
-  const [userPercentile, setUserPercentile] = useState(30);
 
-  const [correctAnswer, setCorrectAnswer] = useState(10);
-  const [rank, setRank] = useState(1);
+   // State for inputs
+   const [userPercentile, setUserPercentile] = useState(30);
+   const [correctAnswer, setCorrectAnswer] = useState(10);
+   const [rank, setRank] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [chartKey, setChartKey] = useState(0);
@@ -40,7 +41,7 @@ const SkillTest = () => {
 
   return (
     <section className="w-full">
-      <p>Skill Test</p>
+      <p className="text-slate-500">Skill Test</p>
       <div className="mt-4 flex flex-col lg:flex-row justify-between gap-5  w-full">
         <section className="flex flex-col gap-4">
           <div className="rounded-lg p-4 border-[1px] border-slate-200 w-full lg:max-w-[600px] flex  justify-between items-center gap-3">
@@ -216,7 +217,7 @@ const SkillTest = () => {
               </span>
             </div>
             <p className="text-wrap flex-1">
-              <span>You scored 12 question correct out of 15</span>. However, it
+              <span>You scored {correctAnswer} question correct out of 15</span>. However, it
               still needs some improvements
             </p>
 

@@ -2,36 +2,109 @@
 
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 export const Modal = ({
   closeModal,
   handleOutsideClick,
   setUserPercentile,
-  userPercentile,
   setChartKey,
   setRank,
-  rank,
-  correctAnswer,
   setCorrectAnswer,
 }) => {
-  const handleUserChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (value >= 0 && value <= 100) {
-      setUserPercentile(value);
-      setChartKey((prevKey) => prevKey + 1); // Trigger chart re-render
+  // Temporary states for input fields
+  const [tempUserPercentile, setTempUserPercentile] = useState("30");
+  const [tempCorrectAnswer, setTempCorrectAnswer] = useState("10");
+  const [tempRank, setTempRank] = useState("1");
+
+  // State for errors
+  const [errors, setErrors] = useState({
+    userPercentile: "",
+    correctAnswer: "",
+    rank: "",
+  });
+
+  // Load initial values from localStorage
+  useEffect(() => {
+    const storedUserPercentile = localStorage.getItem("userPercentile");
+    const storedCorrectAnswer = localStorage.getItem("correctAnswer");
+    const storedRank = localStorage.getItem("rank");
+
+    setUserPercentile(storedUserPercentile ? Number(storedUserPercentile) : 30);
+    setCorrectAnswer(storedCorrectAnswer ? Number(storedCorrectAnswer) : 10);
+    setRank(storedRank ? Number(storedRank) : 1);
+
+    // Initialize temporary states
+    setTempUserPercentile(storedUserPercentile || "30");
+    setTempCorrectAnswer(storedCorrectAnswer || "10");
+    setTempRank(storedRank || "1");
+  }, []);
+
+  // Validation function
+  const validateInput = (name, value) => {
+    if (value.trim() === "") {
+      return "Required, should be a number";
+    }
+
+    const numValue = Number(value);
+
+    switch (name) {
+      case "userPercentile":
+        if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+          return "Value must be a number between 0 and 100";
+        }
+        break;
+      case "correctAnswer":
+        if (isNaN(numValue) || numValue < 0 || numValue > 15) {
+          return "Value must be a number between 0 and 15";
+        }
+        break;
+      case "rank":
+        if (isNaN(numValue) || numValue < 1 || numValue > 5) {
+          return "Value must be a number between 1 and 5";
+        }
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  };
+
+  // Handle input changes with validation
+  const handleInputChange = (name, value, setTempValue) => {
+    setTempValue(value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: validateInput(name, value),
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = () => {
+    const isValid =
+      !errors.userPercentile &&
+      !errors.correctAnswer &&
+      !errors.rank &&
+      tempUserPercentile.trim() &&
+      tempCorrectAnswer.trim() &&
+      tempRank.trim();
+
+    if (isValid) {
+      setUserPercentile(Number(tempUserPercentile));
+      setCorrectAnswer(Number(tempCorrectAnswer));
+      setRank(Number(tempRank));
+
+      localStorage.setItem("userPercentile", tempUserPercentile);
+      localStorage.setItem("correctAnswer", tempCorrectAnswer);
+      localStorage.setItem("rank", tempRank);
+      setChartKey((prevKey) => prevKey + 1);
+      closeModal();
+    } else {
+      alert("Please fix validation errors before submitting.");
     }
   };
-  const handleRankChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    setRank(value);
-  };
-  const handleAnswerChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (value >= 0 && value <= 15) {
-      setCorrectAnswer(value);
-    }
-  };
+
   return (
     <div>
       <div
@@ -39,7 +112,7 @@ export const Modal = ({
         onClick={handleOutsideClick}
       >
         <div
-          className=" modal-content bg-white p-6 rounded  w-full lg:max-w-[600px]"
+          className=" modal-content bg-white p-6 rounded  w-full lg:max-w-[650px]"
           onClick={(e) => e.stopPropagation()}
         >
           <div>
@@ -58,15 +131,22 @@ export const Modal = ({
                   Update your <strong>Rank</strong>
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col  space-y-2">
                 <input
                   type="number"
-                  min="0"
-                  max="100"
-                  value={rank}
-                  onChange={handleRankChange}
-                  className="border border-blue-800 p-2 rounded lg:w-36 w-full text-center"
+                  min="1"
+                  max="5"
+                  value={tempRank}
+                  onChange={(e) =>
+                    handleInputChange("rank", e.target.value, setTempRank)
+                  }
+                  className={`border p-2 rounded lg:w-52 w-full text-center ${
+                    errors.rank ? "border-red-500" : "border-blue-800"
+                  }`}
                 />
+                {errors.rank && (
+                  <p className="text-red-500 text-[10px]">{errors.rank}</p>
+                )}
               </div>
             </div>
 
@@ -79,15 +159,28 @@ export const Modal = ({
                   Update your <strong> Percentile</strong>
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col space-y-2">
                 <input
                   type="number"
                   min="0"
                   max="100"
-                  value={userPercentile}
-                  onChange={handleUserChange}
-                  className="border border-blue-800 p-2 rounded lg:w-36 w-full text-center"
+                  value={tempUserPercentile}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "userPercentile",
+                      e.target.value,
+                      setTempUserPercentile
+                    )
+                  }
+                  className={`border p-2 rounded lg:w-52 w-full text-center ${
+                    errors.userPercentile ? "border-red-500" : "border-blue-800"
+                  }`}
                 />
+                {errors.userPercentile && (
+                  <p className="text-red-500 text-[10px]">
+                    {errors.userPercentile}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -100,25 +193,41 @@ export const Modal = ({
                   Update your <strong>Current Score (out of 15)</strong>
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col  space-y-2">
                 <input
                   type="number"
                   min="0"
-                  max="100"
-                  value={correctAnswer}
-                  onChange={handleAnswerChange}
-                  className="border border-blue-800 p-2 rounded lg:w-36 w-full text-center"
+                  max="15"
+                  value={tempCorrectAnswer}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "correctAnswer",
+                      e.target.value,
+                      setTempCorrectAnswer
+                    )
+                  }
+                  className={`border p-2 rounded lg:w-52 w-full text-center ${
+                    errors.correctAnswer ? "border-red-500" : "border-blue-800"
+                  }`}
                 />
+                {errors.correctAnswer && (
+                  <p className="text-red-500 text-[10px]">
+                    {errors.correctAnswer}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
-              <button className="bg-white text-blue-900 border-2 border-blue-900 px-4 py-2 rounded-md font-bold flex items-center">
+              <button
+                onClick={() => closeModal()}
+                className="bg-white text-blue-900 border-2 border-blue-900 px-4 py-2 rounded-md font-bold flex items-center"
+              >
                 {" "}
                 cancel{" "}
               </button>
               <button
-                onClick={() => closeModal()}
+                onClick={handleSubmit}
                 className="bg-blue-900 text-white px-4 py-2 rounded-md font-bold flex items-center"
               >
                 Save{" "}

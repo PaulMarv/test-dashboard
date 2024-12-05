@@ -36,13 +36,12 @@ export default function RootLayout({ children }) {
             <DesktopNav />
             <MobileNav />
             <div className="w-full lg:pl-[300px] ">
-              <div className="w-full pt-8 min-h-[calc(100vh-122px)] max-w-7xl mx-auto px-5 lg:px-10">
+              <div className="w-full lg:pt-8 min-h-[calc(100vh-122px)] max-w-7xl mx-auto px-5 lg:px-10">
                 {children}
               </div>
             </div>
           </section>
         </section>
-        {/* {children} */}
       </body>
     </html>
   );
